@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'onboarding_screen.dart';
 
 void main() {
@@ -98,6 +100,9 @@ class _MoodScreenState extends State<MoodScreen> {
   String _gender = 'Не указывать';
   String _ageGroup = '26-40';
 
+  // URL вашего Worker (замените на свой, если отличается)
+  final String _workerUrl = 'https://moodstyle-ai.msk230884.workers.dev';
+
   @override
   void initState() {
     super.initState();
@@ -112,82 +117,39 @@ class _MoodScreenState extends State<MoodScreen> {
     });
   }
 
-  String _getFallbackRecommendation(String mood) {
-    String ageContext = '';
-    if (_ageGroup == '16-25') {
-      ageContext = 'молодёжный, яркий, трендовый';
-    } else if (_ageGroup == '26-40') {
-      ageContext = 'элегантный, сбалансированный, современный';
-    } else if (_ageGroup == '40+') {
-      ageContext = 'классический, сдержанный, качественный';
-    }
-
-    String genderContext = '';
-    if (_gender == 'Женский') {
-      genderContext = 'женский';
-    } else if (_gender == 'Мужской') {
-      genderContext = 'мужской';
-    } else {
-      genderContext = 'унисекс';
-    }
-
-    switch (mood) {
-      case 'Радость':
-        if (_gender == 'Женский') {
-          return '👗 Яркое летнее платье с цветочным принтом, солнечные очки и босоножки. Цвета: жёлтый, оранжевый. Стиль: $ageContext.';
-        } else if (_gender == 'Мужской') {
-          return '👕 Светлая льняная рубашка, бежевые чиносы, кеды. Цвета: голубой, белый, жёлтый. Стиль: $ageContext.';
-        } else {
-          return '🎉 Яркий total look: худи с принтом, джинсы-бойфренды, кроссовки. Цвета: жёлтый, мятный. Стиль: $ageContext.';
-        }
-      case 'Спокойствие':
-        if (_gender == 'Женский') {
-          return '🧘‍♀️ Льняной костюм оверсайз, деревянные бусы, удобные slip-on\'ы. Цвета: небесно-голубой, песочный. Стиль: $ageContext.';
-        } else if (_gender == 'Мужской') {
-          return '📘 Пастельная футболка-поло, бежевые чиносы, кожаные сандалии. Цвета: мятный, серый. Стиль: $ageContext.';
-        } else {
-          return '🍃 Свободный свитшот, брюки карго из хлопка, эко-кеды. Цвета: оливковый, бежевый. Стиль: $ageContext.';
-        }
-      case 'Энергия':
-        if (_gender == 'Женский') {
-          return '🏃‍♀️ Спортивный костюм с неоновыми вставками, удобные кроссовки, кепка. Цвета: красный, ярко-синий. Стиль: $ageContext.';
-        } else if (_gender == 'Мужской') {
-          return '⚡ Термохуди с контрастными деталями, леггинсы или джоггеры, сникерсы. Цвета: оранжевый, чёрный. Стиль: $ageContext.';
-        } else {
-          return '✨ Шертянка из переработанных материалов, технологичные кроссовки, ветровка. Цвета: лайм, фиолетовый. Стиль: $ageContext.';
-        }
-      case 'Романтика':
-        if (_gender == 'Женский') {
-          return '🌸 Воздушное платье макси из шифона, тонкая цепочка, босоножки на шпильке. Цвета: розовая пудра, лавандовый. Стиль: $ageContext.';
-        } else if (_gender == 'Мужской') {
-          return '💼 Костюм-двойка из мягкой ткани, замшевые лоферы, кожаный ремень. Цвета: тёмно-зелёный, бордовый. Стиль: $ageContext.';
-        } else {
-          return '🕊️ Шёлковая рубашка с цветочным принтом, зауженные брюки, классические туфли. Цвета: пыльная роза, черника. Стиль: $ageContext.';
-        }
-      case 'Уверенность':
-        if (_gender == 'Женский') {
-          return '👔 Жакет с чёткими плечами, брюки-палаццо, массивные серьги, кожаная сумка. Цвета: чёрный, бордовый. Стиль: $ageContext.';
-        } else if (_gender == 'Мужской') {
-          return '⌚ Точно скроенный пиджак из плотной ткани, джинсы или брюки, часы, портфель. Цвета: тёмно-синий, серый. Стиль: $ageContext.';
-        } else {
-          return '💼 Кроп-пиджак, чиносы, умные часы, кожаные туфли. Цвета: антрацит, горчица. Стиль: $ageContext.';
-        }
-      case 'Творчество':
-        if (_gender == 'Женский') {
-          return '🎨 Асимметричная юбка, базовая футболка с принтом, необычные серьги, сникерсы. Цвета: фуксия, зелёный. Стиль: $ageContext.';
-        } else if (_gender == 'Мужской') {
-          return '✏️ Брюки из фактурной ткани, деним поверх рубашки, яркие носки, лоферы. Цвета: охра, тёмный оливковый. Стиль: $ageContext.';
-        } else {
-          return '🌈 Оверсайз-бомбер, многослойные детали, кроссовки на платформе. Цвета: ультрамарин, мандарин. Стиль: $ageContext.';
-        }
-      default:
-        return 'Классический образ: качественные базовые вещи. Стиль: $ageContext, подходит для $genderContext.';
+  Future<String> _getAIRecommendation(String mood, String event) async {
+    try {
+      final url = Uri.parse('$_workerUrl?gender=$_gender&age=$_ageGroup&mood=$mood&event=$event');
+      final response = await http.get(url);
+      
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['image_url'];
+      } else {
+        return _getFallbackRecommendation(mood);
+      }
+    } catch (e) {
+      return _getFallbackRecommendation(mood);
     }
   }
 
-  Future<String> _getAIRecommendation(String mood) async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    return _getFallbackRecommendation(mood);
+  String _getFallbackRecommendation(String mood) {
+    switch (mood) {
+      case 'Радость':
+        return 'https://placehold.co/600x400/FFD700/white?text=Joy';
+      case 'Спокойствие':
+        return 'https://placehold.co/600x400/90EE90/white?text=Calm';
+      case 'Энергия':
+        return 'https://placehold.co/600x400/FF4500/white?text=Energy';
+      case 'Романтика':
+        return 'https://placehold.co/600x400/FF69B4/white?text=Romance';
+      case 'Уверенность':
+        return 'https://placehold.co/600x400/4169E1/white?text=Confidence';
+      case 'Творчество':
+        return 'https://placehold.co/600x400/9370DB/white?text=Creativity';
+      default:
+        return 'https://placehold.co/600x400/808080/white?text=Style';
+    }
   }
 
   void _showOutfitRecommendation(Mood mood) async {
@@ -201,13 +163,13 @@ class _MoodScreenState extends State<MoodScreen> {
           children: [
             CircularProgressIndicator(),
             SizedBox(height: 16),
-            Text('Подбираем идеальный образ...'),
+            Text('Генерируем образ...'),
           ],
         ),
       ),
     );
 
-    String recommendation = await _getAIRecommendation(mood.name);
+    String imageUrl = await _getAIRecommendation(mood.name, 'Прогулка');
 
     if (mounted) {
       Navigator.pop(context);
@@ -217,11 +179,10 @@ class _MoodScreenState extends State<MoodScreen> {
           title: Text('${mood.name} ✨'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Вот что тебе подойдёт:', style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 10),
-              Text(recommendation),
+              Image.network(imageUrl, height: 200, fit: BoxFit.cover),
+              const SizedBox(height: 16),
+              Text('Образ для настроения "${mood.name}"'),
             ],
           ),
           actions: [
