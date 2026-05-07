@@ -43,7 +43,6 @@ class _CheckFirstTimeState extends State<CheckFirstTime> {
   Future<void> _checkFirstTime() async {
     final prefs = await SharedPreferences.getInstance();
     final completed = prefs.getBool('onboarding_completed') ?? false;
-
     if (mounted) {
       setState(() {
         showOnboarding = !completed;
@@ -54,11 +53,8 @@ class _CheckFirstTimeState extends State<CheckFirstTime> {
   @override
   Widget build(BuildContext context) {
     if (showOnboarding == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
-
     if (showOnboarding == true) {
       return const OnboardingScreen();
     } else {
@@ -72,7 +68,6 @@ class Mood {
   final IconData icon;
   final Color color;
   final bool isPaid;
-
   Mood({required this.name, required this.icon, required this.color, required this.isPaid});
 }
 
@@ -99,8 +94,6 @@ class _MoodScreenState extends State<MoodScreen> {
   bool _hasSubscription = false;
   String _gender = 'Не указывать';
   String _ageGroup = '26-40';
-
-  // URL вашего Worker (замените на свой, если отличается)
   final String _workerUrl = 'https://moodstyle-ai.msk230884.workers.dev';
 
   @override
@@ -121,13 +114,11 @@ class _MoodScreenState extends State<MoodScreen> {
     try {
       final url = Uri.parse('$_workerUrl?gender=$_gender&age=$_ageGroup&mood=$mood&event=$event');
       final response = await http.get(url);
-      
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return data['image_url'];
-      } else {
-        return _getFallbackRecommendation(mood);
+        return data['image_url'] ?? _getFallbackRecommendation(mood);
       }
+      return _getFallbackRecommendation(mood);
     } catch (e) {
       return _getFallbackRecommendation(mood);
     }
@@ -135,20 +126,13 @@ class _MoodScreenState extends State<MoodScreen> {
 
   String _getFallbackRecommendation(String mood) {
     switch (mood) {
-      case 'Радость':
-        return 'https://placehold.co/600x400/FFD700/white?text=Joy';
-      case 'Спокойствие':
-        return 'https://placehold.co/600x400/90EE90/white?text=Calm';
-      case 'Энергия':
-        return 'https://placehold.co/600x400/FF4500/white?text=Energy';
-      case 'Романтика':
-        return 'https://placehold.co/600x400/FF69B4/white?text=Romance';
-      case 'Уверенность':
-        return 'https://placehold.co/600x400/4169E1/white?text=Confidence';
-      case 'Творчество':
-        return 'https://placehold.co/600x400/9370DB/white?text=Creativity';
-      default:
-        return 'https://placehold.co/600x400/808080/white?text=Style';
+      case 'Радость': return 'https://placehold.co/600x400/FFD700/white?text=Joy';
+      case 'Спокойствие': return 'https://placehold.co/600x400/90EE90/white?text=Calm';
+      case 'Энергия': return 'https://placehold.co/600x400/FF4500/white?text=Energy';
+      case 'Романтика': return 'https://placehold.co/600x400/FF69B4/white?text=Romance';
+      case 'Уверенность': return 'https://placehold.co/600x400/4169E1/white?text=Confidence';
+      case 'Творчество': return 'https://placehold.co/600x400/9370DB/white?text=Creativity';
+      default: return 'https://placehold.co/600x400/808080/white?text=Style';
     }
   }
 
@@ -217,10 +201,7 @@ class _MoodScreenState extends State<MoodScreen> {
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Позже'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Позже')),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
@@ -240,10 +221,7 @@ class _MoodScreenState extends State<MoodScreen> {
         title: const Text('ℹ️ Демо-режим'),
         content: const Text('В реальном приложении здесь будет оформление подписки через Google Play. Сейчас это демонстрация.'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Понятно'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Понятно')),
         ],
       ),
     );
@@ -265,25 +243,16 @@ class _MoodScreenState extends State<MoodScreen> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           if (!_hasSubscription)
-            TextButton(
-              onPressed: _showPaywall,
-              child: const Text('Премиум', style: TextStyle(color: Colors.white)),
-            ),
+            TextButton(onPressed: _showPaywall, child: const Text('Премиум', style: TextStyle(color: Colors.white))),
         ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            const Text(
-              'Как ты себя чувствуешь?',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
+            const Text('Как ты себя чувствуешь?', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
-            const Text(
-              'Бесплатные настроения',
-              style: TextStyle(fontSize: 16, color: Colors.grey),
-            ),
+            const Text('Бесплатные настроения', style: TextStyle(fontSize: 16, color: Colors.grey)),
             const SizedBox(height: 10),
             GridView.builder(
               shrinkWrap: true,
@@ -295,17 +264,11 @@ class _MoodScreenState extends State<MoodScreen> {
               itemCount: freeMoods.length,
               itemBuilder: (context, index) {
                 final mood = freeMoods[index];
-                return _MoodCard(
-                  mood: mood,
-                  onTap: () => _onMoodTap(mood),
-                );
+                return _MoodCard(mood: mood, onTap: () => _onMoodTap(mood));
               },
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Премиум-настроения',
-              style: TextStyle(fontSize: 16, color: Colors.grey),
-            ),
+            const Text('Премиум-настроения', style: TextStyle(fontSize: 16, color: Colors.grey)),
             const SizedBox(height: 10),
             GridView.builder(
               shrinkWrap: true,
@@ -358,11 +321,7 @@ class _MoodCard extends StatelessWidget {
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    mood.icon,
-                    size: 40,
-                    color: isLocked ? Colors.grey : mood.color,
-                  ),
+                  Icon(mood.icon, size: 40, color: isLocked ? Colors.grey : mood.color),
                   const SizedBox(height: 8),
                   Text(
                     mood.name,
@@ -378,11 +337,7 @@ class _MoodCard extends StatelessWidget {
                 Positioned(
                   top: 8,
                   right: 8,
-                  child: Icon(
-                    Icons.lock,
-                    size: 16,
-                    color: Colors.grey.shade600,
-                  ),
+                  child: Icon(Icons.lock, size: 16, color: Colors.grey.shade600),
                 ),
             ],
           ),
